@@ -202,7 +202,7 @@ namespace DbgEngIdl
                   .AppendLine("    uuid(" + uuids[name] + "),")
                   .AppendLine("    helpstring(\"" + name + "\")")
                   .AppendLine("]")
-                  .Append($"interface {name} : {super} ").AppendLine()
+                  .AppendLine($"interface {name} : {super} ")
                   .AppendLine("{")
                   ;
 
