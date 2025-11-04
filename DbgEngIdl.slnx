@@ -4,4 +4,5 @@
   </Folder>
   <Project Path="DbgEngIdl/DbgEngIdl.csproj" Id="dbb3b947-1ec6-46c2-b0ca-5d31b70b1003" />
   <Project Path="FixConformantArray/FixConformantArray.csproj" Id="5be068dd-cf0b-4658-a208-ea57440c3eed" />
+  <Project Path="Interop.DbgEng/Interop.DbgEng.csproj" Id="c357d88c-6b68-498e-b44a-15692c159743" />
 </Solution>
