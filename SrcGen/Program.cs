@@ -127,7 +127,12 @@ namespace SrcGen
             var isUnion = line["typedef ".Length] == 'u';
 
             var structName = line[(isUnion ? "typedef union _" : "typedef struct _").Length..];
-            if (structName.EndsWith('{'))
+
+            if (structName.ContainsAny("*;"))
+            {
+                return;
+            }
+            else if (structName.EndsWith('{'))
             {
                 structName = structName[..structName.IndexOf(' ')];
             }
@@ -307,11 +312,9 @@ namespace SrcGen
             {
                 Output.WriteLine($$"""
                     [System.Runtime.CompilerServices.InlineArray({{length}})]
-                    public struct ArrayOf{{length}}<T>
-                    {
-                        private T _item;
-                    }
+                    public struct ArrayOf{{length}}<T> { private T _item; }
                     """);
+                Output.WriteLine();
             }
         }
 

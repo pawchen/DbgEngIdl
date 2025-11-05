@@ -3,6 +3,21 @@
 public class StructTests : TestsBase
 {
     [Fact]
+    public void TestIngore1()
+    {
+        AssertGenerated("""
+            namespace Interop.DbgEng;
+            """,
+            hppSrc: """
+            #ifndef _WDBGEXTS_
+            typedef struct _WINDBG_EXTENSION_APIS32* PWINDBG_EXTENSION_APIS32;
+            typedef struct _WINDBG_EXTENSION_APIS64* PWINDBG_EXTENSION_APIS64;
+            #endif
+            """,
+            "");
+    }
+
+    [Fact]
     public void TestStruct1()
     {
         AssertGenerated("""
@@ -242,10 +257,7 @@ public class StructTests : TestsBase
             }
 
             [System.Runtime.CompilerServices.InlineArray(3)]
-            public struct ArrayOf3<T>
-            {
-                private T _item;
-            }
+            public struct ArrayOf3<T> { private T _item; }
             """,
             "",
             missingSrc: """
