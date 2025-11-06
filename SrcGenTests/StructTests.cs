@@ -310,6 +310,21 @@ public class StructTests : TestsBase
     }
 
     [Fact]
+    public void TestConstant5()
+    {
+        AssertGenerated("""
+            public static partial class Constants
+            {
+                public const UINT64 X = 0x100000000; // comment
+            }
+            """,
+            hppSrc: """
+            #define X 0x100000000 // comment
+            """,
+            "");
+    }
+
+    [Fact]
     public void TestInlineArray1()
     {
         AssertGenerated("""
