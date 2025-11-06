@@ -54,11 +54,13 @@ namespace SrcGen
 
         public void Generate(TextReader hpp, TextReader missing)
         {
-            Output.WriteLine("using System.Runtime.CompilerServices;");
-            Output.WriteLine("using System.Runtime.InteropServices;");
-            Output.WriteLine();
-            Output.WriteLine("namespace Interop.DbgEng;");
-            Output.WriteLine();
+            Output.WriteLine("""
+                using System.Runtime.CompilerServices;
+                using System.Runtime.InteropServices;
+
+                namespace Interop.DbgEng;
+
+                """);
 
             WriteDefinitions(hpp);
             WriteDefinitions(missing);
