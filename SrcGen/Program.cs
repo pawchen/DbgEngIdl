@@ -68,6 +68,7 @@ namespace SrcGen
             WriteDefinitions(hpp);
 
             WriteConstants();
+            WriteIIDs();
             WriteInlineArrays();
         }
 
@@ -187,6 +188,37 @@ namespace SrcGen
                 {
                     Output.WriteLine($"    public const {def.type} {name} = {def.value.Trim()}; //{def.comment}");
                 }
+            }
+
+            Output.WriteLine("}");
+            Output.WriteLine();
+        }
+
+        private void WriteIIDs()
+        {
+            if (UUIDs.Count < 1)
+            {
+                return;
+            }
+
+            Output.WriteLine("public static partial class Constants");
+            Output.WriteLine("{");
+
+            Span<byte> bytes = stackalloc byte[16];
+            var formatted = new StringBuilder(", 0x00".Length * bytes.Length);
+
+            foreach (var (name, iid) in UUIDs)
+            {
+                Guid.Parse(iid).TryWriteBytes(bytes);
+
+                formatted.Length = 0;
+                formatted.Append($"0x{bytes[0]:x2}");
+                for (int i = 1; i < bytes.Length; i++)
+                {
+                    formatted.Append($", 0x{bytes[i]:x2}");
+                }
+
+                Output.WriteLine($"    public static ReadOnlySpan<byte> IID_{name} => [{formatted}];");
             }
 
             Output.WriteLine("}");

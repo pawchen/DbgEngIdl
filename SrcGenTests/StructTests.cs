@@ -325,6 +325,41 @@ public class StructTests : TestsBase
     }
 
     [Fact]
+    public void TestConstant6()
+    {
+        AssertGenerated("""
+            public static partial class Constants
+            {
+                public static ReadOnlySpan<byte> IID_ISomeInterface => [0x53, 0x5f, 0xdf, 0xf2, 0x1f, 0x07, 0xbd, 0x47, 0x9d, 0xe6, 0x57, 0x34, 0xc3, 0xfe, 0xd6, 0x89];
+            }
+            """,
+            hppSrc: """
+            typedef interface DECLSPEC_UUID("f2df5f53-071f-47bd-9de6-5734c3fed689")
+                ISomeInterface* PSOME_INTERFACE;
+            """,
+            "");
+    }
+
+    [Fact]
+    public void TestConstant7()
+    {
+        AssertGenerated("""
+            public static partial class Constants
+            {
+                public static ReadOnlySpan<byte> IID_ISomeInterface => [0x53, 0x5f, 0xdf, 0xf2, 0x1f, 0x07, 0xbd, 0x47, 0x9d, 0xe6, 0x57, 0x34, 0xc3, 0xfe, 0xd6, 0x89];
+                public static ReadOnlySpan<byte> IID_ISomeInterface1 => [0x67, 0x90, 0x06, 0xd1, 0x65, 0x2a, 0xf0, 0x4b, 0xae, 0x97, 0x76, 0x18, 0x4b, 0x67, 0x85, 0x6b];
+            }
+            """,
+            hppSrc: """
+            typedef interface DECLSPEC_UUID("f2df5f53-071f-47bd-9de6-5734c3fed689")
+                ISomeInterface* PSOME_INTERFACE;
+            typedef interface DECLSPEC_UUID("d1069067-2a65-4bf0-ae97-76184b67856b")
+                ISomeInterface1* PSOME_INTERFACE1;
+            """,
+            "");
+    }
+
+    [Fact]
     public void TestInlineArray1()
     {
         AssertGenerated("""
