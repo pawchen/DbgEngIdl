@@ -77,6 +77,25 @@ public class StructTests : TestsBase
     }
 
     [Fact]
+    public void TestStruct4()
+    {
+        AssertGenerated("""
+            public struct DebugOffsetRegion
+            {
+                [MarshalAs(UnmanagedType.LPWStr)]
+                public string Base; // comment
+            }
+            """,
+            hppSrc: """
+            typedef struct _DEBUG_OFFSET_REGION
+            {
+                PCWSTR Base; // comment
+            } DEBUG_OFFSET_REGION, *PDEBUG_OFFSET_REGION;
+            """,
+            "");
+    }
+
+    [Fact]
     public void TestStructsRef1()
     {
         AssertGenerated("""

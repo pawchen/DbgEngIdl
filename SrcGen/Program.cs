@@ -298,9 +298,10 @@ namespace SrcGen
                     {
                         type = generatedType;
                     }
-                    else if (type.EndsWith("STR"))
+                    else if (type.EndsWith("PCWSTR"))
                     {
-                        Output.WriteLine("    [string]");
+                        Output.WriteLine("    [MarshalAs(UnmanagedType.LPWStr)]");
+                        type = "string";
                     }
 
                     var memberName = line[(space + 1)..];
