@@ -267,6 +267,21 @@ public class StructTests : TestsBase
     }
 
     [Fact]
+    public void TestConstant4()
+    {
+        AssertGenerated("""
+            public static partial class Constants
+            {
+                public const DWORD EXCEPTION_MAXIMUM_PARAMETERS = 15; // maximum number of exception parameters
+            }
+            """,
+            hppSrc: """
+            const DWORD EXCEPTION_MAXIMUM_PARAMETERS = 15; // maximum number of exception parameters
+            """,
+            "");
+    }
+
+    [Fact]
     public void TestInlineArray1()
     {
         AssertGenerated("""

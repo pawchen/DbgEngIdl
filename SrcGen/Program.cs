@@ -44,6 +44,8 @@ namespace SrcGen
                 generatedFileName = args[2];
             }
 
+            Console.WriteLine($"SrcGen is running at {Environment.CurrentDirectory}");
+
             using var hpp = File.OpenText(dbgEngHeaderFileName);
             using var missing = File.Exists(missingHeaderFileName) ? File.OpenText(missingHeaderFileName) : StreamReader.Null;
             using var output = new StreamWriter(new FileStream(generatedFileName, FileMode.Create));
@@ -77,7 +79,7 @@ namespace SrcGen
             {
                 var line = hpp.ReadLine();
 
-                if (line.StartsWith("#define "))
+                if (line.StartsWith("#define ") || line.StartsWith("const "))
                 {
                     TryCollectConstant(line);
                 }
@@ -102,24 +104,50 @@ namespace SrcGen
 
         private bool TryCollectConstant(string line)
         {
-            Span<Range> parts = stackalloc Range[2];
-            var define = line.AsSpan("#define ".Length);
-            var count = define.Split(parts, ' ', StringSplitOptions.RemoveEmptyEntries);
-
-            if (count < 2)
+            if (line[0] == '#')
             {
-                return false;
-            }
+                Span<Range> parts = stackalloc Range[2];
+                var define = line.AsSpan("#define ".Length);
+                var count = define.Split(parts, ' ', StringSplitOptions.RemoveEmptyEntries);
 
-            if (!Char.IsDigit(define[parts[1]][0]))
-            {
-                return false;
+                if (count < 2 || !Char.IsDigit(define[parts[1]][0]))
+                {
+                    return false;
+                }
+
+                var name = define[parts[0]].ToString();
+                var value = define[parts[1]];
+                string comment = GetComment(ref value);
+
+                Constants[name] = ("UINT32", value.ToString(), comment);
+
+                return true;
             }
             else
             {
-                var name = define[parts[0]].ToString();
-                var value = define[parts[1]];
+                Span<Range> parts = stackalloc Range[3];
+                var expression = line.AsSpan("const ".Length);
+                var count = expression.SplitAny(parts, " =", StringSplitOptions.RemoveEmptyEntries);
 
+                if (count < 3 || !Char.IsDigit(expression[parts[2]][0]))
+                {
+                    return false;
+                }
+
+                var type = expression[parts[0]].ToString();
+                var name = expression[parts[1]].ToString();
+                var value = expression[parts[2]];
+                var comment = GetComment(ref value);
+
+                value = value[..value.IndexOf(';')];
+
+                Constants[name] = (type, value.ToString(), comment);
+
+                return true;
+            }
+
+            static string GetComment(ref ReadOnlySpan<char> value)
+            {
                 string comment = null;
                 var slash = value.IndexOf("//");
                 if (slash > -1)
@@ -128,9 +156,7 @@ namespace SrcGen
                     value = value[..slash];
                 }
 
-                Constants[name] = ("UINT32", value.ToString(), comment);
-
-                return true;
+                return comment;
             }
         }
 
