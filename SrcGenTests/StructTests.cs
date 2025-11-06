@@ -77,6 +77,34 @@ public class StructTests : TestsBase
     }
 
     [Fact]
+    public void TestStructsRef1()
+    {
+        AssertGenerated("""
+            public struct REF
+            {
+                public ULONG64 Size;
+            }
+
+            public struct B
+            {
+                public REF Base; // comment
+            }
+            """,
+            "",
+            missingSrc: """
+            typedef struct _R_E_F
+            {
+                ULONG64 Size;
+            } R_E_F, *PR_E_F;
+
+            typedef struct _B
+            {
+                R_E_F Base; // comment
+            } B, *PB;
+            """);
+    }
+
+    [Fact]
     public void TestNested1()
     {
         AssertGenerated("""

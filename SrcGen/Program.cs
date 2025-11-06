@@ -14,6 +14,7 @@ namespace SrcGen
 
         readonly TextWriter Output;
         readonly Dictionary<string, string> UUIDs = [];
+        readonly Dictionary<string, string> Types = [];
         readonly Dictionary<string, (string type, string value, string comment)> Constants = [];
         readonly HashSet<int> InlineArrays = [];
 
@@ -210,7 +211,10 @@ namespace SrcGen
                 Output.WriteLine(ExplicitLayoutAttribute);
             }
 
-            Output.WriteLine($"public struct {SnakeToCamel(structName)}");
+            var generatedStructName = SnakeToCamel(structName);
+            Types.GetAlternateLookup<ReadOnlySpan<char>>()[structName] = generatedStructName;
+
+            Output.WriteLine($"public struct {generatedStructName}");
             Output.WriteLine("{");
 
             WriteStructBody(hpp, 0, isUnion);
@@ -255,7 +259,11 @@ namespace SrcGen
                         type = line[(type.Length + 1)..space];
                     }
 
-                    if (type.EndsWith("STR"))
+                    if (Types.GetAlternateLookup<ReadOnlySpan<char>>().TryGetValue(type, out var generatedType))
+                    {
+                        type = generatedType;
+                    }
+                    else if (type.EndsWith("STR"))
                     {
                         Output.WriteLine("    [string]");
                     }
