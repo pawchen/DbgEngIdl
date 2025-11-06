@@ -25,9 +25,28 @@ namespace SrcGen
 
         public static void Main(string[] args)
         {
-            using var output = new StreamWriter(new FileStream("DbgEng.g.cs", FileMode.Create));
-            using var hpp = File.OpenText("dbgeng.h");
-            using var missing = File.OpenText("missing.h");
+            var dbgEngHeaderFileName = "dbgeng.h";
+            var missingHeaderFileName = "missing.h";
+            var generatedFileName = "DbgEng.g.cs";
+
+            if (args.Length > 0)
+            {
+                dbgEngHeaderFileName = args[0];
+            }
+
+            if (args.Length > 1)
+            {
+                missingHeaderFileName = args[1];
+            }
+
+            if (args.Length > 2)
+            {
+                generatedFileName = args[2];
+            }
+
+            using var hpp = File.OpenText(dbgEngHeaderFileName);
+            using var missing = File.Exists(missingHeaderFileName) ? File.OpenText(missingHeaderFileName) : StreamReader.Null;
+            using var output = new StreamWriter(new FileStream(generatedFileName, FileMode.Create));
 
             var program = new Program(output);
             program.Generate(hpp, missing);
@@ -35,6 +54,9 @@ namespace SrcGen
 
         public void Generate(TextReader hpp, TextReader missing)
         {
+            Output.WriteLine("using System.Runtime.CompilerServices;");
+            Output.WriteLine("using System.Runtime.InteropServices;");
+            Output.WriteLine();
             Output.WriteLine("namespace Interop.DbgEng;");
             Output.WriteLine();
 
@@ -311,7 +333,7 @@ namespace SrcGen
             foreach (var length in InlineArrays)
             {
                 Output.WriteLine($$"""
-                    [System.Runtime.CompilerServices.InlineArray({{length}})]
+                    [InlineArray({{length}})]
                     public struct ArrayOf{{length}}<T> { private T _item; }
                     """);
                 Output.WriteLine();

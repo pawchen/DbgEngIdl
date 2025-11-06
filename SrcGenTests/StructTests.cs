@@ -5,9 +5,8 @@ public class StructTests : TestsBase
     [Fact]
     public void TestIngore1()
     {
-        AssertGenerated("""
-            namespace Interop.DbgEng;
-            """,
+        AssertGenerated(
+            "",
             hppSrc: """
             #ifndef _WDBGEXTS_
             typedef struct _WINDBG_EXTENSION_APIS32* PWINDBG_EXTENSION_APIS32;
@@ -21,8 +20,6 @@ public class StructTests : TestsBase
     public void TestStruct1()
     {
         AssertGenerated("""
-            namespace Interop.DbgEng;
-
             public struct DebugOffsetRegion
             {
                 public ULONG64 Base;
@@ -43,8 +40,6 @@ public class StructTests : TestsBase
     public void TestStruct2()
     {
         AssertGenerated("""
-            namespace Interop.DbgEng;
-
             public struct DebugOffsetRegion
             {
                 public ULONG64 Base;
@@ -65,8 +60,6 @@ public class StructTests : TestsBase
     public void TestStruct3()
     {
         AssertGenerated("""
-            namespace Interop.DbgEng;
-
             public struct DebugOffsetRegion
             {
                 public ULONG64 Base; // comment
@@ -87,8 +80,6 @@ public class StructTests : TestsBase
     public void TestNested1()
     {
         AssertGenerated("""
-            namespace Interop.DbgEng;
-
             [StructLayout(LayoutKind.Explicit)]
             public struct InlineFrameContext
             {
@@ -157,8 +148,6 @@ public class StructTests : TestsBase
     public void TestNested2()
     {
         AssertGenerated("""
-            namespace Interop.DbgEng;
-
             public struct DebugValue
             {
 
@@ -236,8 +225,6 @@ public class StructTests : TestsBase
     public void TestConstant1()
     {
         AssertGenerated("""
-            namespace Interop.DbgEng;
-
             public static partial class Constants
             {
                 public const UINT32 X = 0;
@@ -253,8 +240,6 @@ public class StructTests : TestsBase
     public void TestConstant2()
     {
         AssertGenerated("""
-            namespace Interop.DbgEng;
-
             public static partial class Constants
             {
                 public const UINT32 X = 0;
@@ -270,15 +255,13 @@ public class StructTests : TestsBase
     public void TestInlineArray1()
     {
         AssertGenerated("""
-            namespace Interop.DbgEng;
-
             public struct DebugOffsetRegion
             {
                 public ArrayOf3<ULONG64> Base;
                 public ULONG64 Size;
             }
 
-            [System.Runtime.CompilerServices.InlineArray(3)]
+            [InlineArray(3)]
             public struct ArrayOf3<T> { private T _item; }
             """,
             "",
