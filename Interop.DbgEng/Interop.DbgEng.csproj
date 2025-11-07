@@ -12,8 +12,12 @@
     <PackageReference Include="Microsoft.Debugging.Platform.SymSrv" Version="20250929.1313.0" />
   </ItemGroup>
 
-  <Target Name="GenSrc" AfterTargets="Restore" BeforeTargets="BeforeCompile;CoreCompile">
+  <Target Name="GenSrc" AfterTargets="ResolveReferences" BeforeTargets="BeforeCompile;CoreCompile">
     <Exec Command="&quot;$(OutDir)../../SrcGen/$(Configuration)/SrcGen.exe&quot; &quot;$(MicrosoftDebuggingPlatformDbgEngContent)../build/native/inc/dbgeng.h&quot;" />
+    <ItemGroup>
+      <Compile Include="DbgEng.g.cs"/>
+      <FileWrites Include="DbgEng.g.cs"/>
+    </ItemGroup>
   </Target>
 
 </Project>

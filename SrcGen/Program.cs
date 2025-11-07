@@ -475,7 +475,7 @@ namespace SrcGen
             var interfaceName = line["DECLARE_INTERFACE_(".Length..line.IndexOf(',')];
 
             Output.Write($$"""
-                [GeneratedComInterface]
+                [GeneratedComInterface(Options = ComInterfaceOptions.ComObjectWrapper)]
                 [Guid("{{UUIDs.GetAlternateLookup<ReadOnlySpan<char>>()[interfaceName]}}")]
                 public partial interface {{interfaceName}}
                 """);
