@@ -120,7 +120,7 @@ public class InterfaceTests : TestsBase
             #define INTERFACE ISomeInterface3
             DECLARE_INTERFACE_(ISomeInterface3, IUnknown)
             {
-                // ISomeInterface3.
+                // ISomeInterface3
             };
             
             #undef INTERFACE

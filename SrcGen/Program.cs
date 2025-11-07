@@ -500,7 +500,7 @@ namespace SrcGen
             Output.WriteLine();
             Output.WriteLine("{");
 
-            SeekTo(hpp, $"// {interfaceName}.", true);
+            SeekTo(hpp, $"// {interfaceName}", true);
 
             ReadOnlySpan<char> methodName = "", returnType = "";
             var paramWasOptional = false;
