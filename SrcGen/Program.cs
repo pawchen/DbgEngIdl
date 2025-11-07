@@ -473,9 +473,10 @@ namespace SrcGen
 
             var line = fullLine.AsSpan();
             var interfaceName = line["DECLARE_INTERFACE_(".Length..line.IndexOf(',')];
+            var wrapperType = interfaceName.Contains("Callback", StringComparison.Ordinal) ? "ManagedObjectWrapper" : "ComObjectWrapper";
 
             Output.Write($$"""
-                [GeneratedComInterface(Options = ComInterfaceOptions.ComObjectWrapper)]
+                [GeneratedComInterface(Options = ComInterfaceOptions.{{wrapperType}})]
                 [Guid("{{UUIDs.GetAlternateLookup<ReadOnlySpan<char>>()[interfaceName]}}")]
                 public partial interface {{interfaceName}}
                 """);
