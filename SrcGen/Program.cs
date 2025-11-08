@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -503,7 +504,7 @@ namespace SrcGen
 
             SeekTo(hpp, $"// {interfaceName}", true);
 
-            ReadOnlySpan<char> methodName = "";
+            ReadOnlySpan<char> methodName = default;
 
             while (hpp.Peek() > -1)
             {
@@ -548,21 +549,41 @@ namespace SrcGen
                     if (line.StartsWith('_'))
                     {
                         // See https://learn.microsoft.com/en-us/cpp/code-quality/annotating-function-parameters-and-return-values?view=msvc-170
+                        // Currently used ones:
+                        // _In_: opt, reads(n), reads_opt(n), reads_bytes(n), reads_bytes_opt(n)
+                        // _Out_: opt, writes(n), writes_opt(n), writes_bytes(n), writes_bytes_opt(n), writes_to(n,x), writes_to_opt(n,x)
+                        // _Outptr_: result_buffer(n)
+                        // _Inout_: opt
 
                         var annotation = line[..line.IndexOfAny(" (")];
-                        var maybeNull = annotation.EndsWith("_opt_");
-                        ReadOnlySpan<char> type = "", spanLength = "";
-                        var isReadOnly = true;
+                        var mayBeDefault = annotation.EndsWith("_opt_");
+
+                        var isReadOnly = false;
+                        ReadOnlySpan<char> spanLength = default;
 
                         if (annotation["_".Length] == 'O') // output parameter
                         {
+                            if (annotation.Contains("writes", StringComparison.Ordinal))
+                            {
+
+                            }
                         }
-                        else if (annotation["_In".Length] == 'o') // ref parameter
+                        else if (annotation["_In".Length] == 'o')
                         {
-                            isReadOnly = false;
+                            if (annotation.Contains("updates", StringComparison.Ordinal))
+                            {
+                                // We have not seen _updates_ in _Inout_ annotations yet
+                                throw new NotImplementedException();
+                            }
                         }
                         else
                         {
+                            isReadOnly = true;
+
+                            if (annotation.Contains("reads", StringComparison.Ordinal))
+                            {
+
+                            }
                         }
 
                         //var parts = line.Split(' ');
