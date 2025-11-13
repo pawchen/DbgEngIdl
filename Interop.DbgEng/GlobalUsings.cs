@@ -45,3 +45,5 @@ global using LONG32 = System.Int32;
 global using LONG64 = System.Int64;
 
 global using HRESULT = System.Int32;
+global using GUID = System.Guid;
+

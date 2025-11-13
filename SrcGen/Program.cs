@@ -24,11 +24,11 @@ namespace SrcGen
 
         readonly TextWriter Output;
         readonly Dictionary<string, string> UUIDs = [];
-        readonly Dictionary<string, string> Types = [];
+        readonly Dictionary<string, (string generatedName, bool isValueType)> Types = [];
         readonly Dictionary<string, (string type, string value, string comment)> Constants = [];
         readonly HashSet<int> InlineArrays = [];
 
-        bool TryGetGeneratedType(ReadOnlySpan<char> native, out string managed)
+        bool TryGetGeneratedType(ReadOnlySpan<char> native, out (string generatedName, bool isValueType) managed)
             => Types.GetAlternateLookup<ReadOnlySpan<char>>().TryGetValue(native, out managed);
 
         public Program(TextWriter output)
@@ -97,10 +97,10 @@ namespace SrcGen
                     var typedef = hpp.ReadLine().AsSpan().Trim();
                     var star = typedef.IndexOf('*');
                     var name = typedef[..star].ToString();
-                    var pointerType = typedef[star..typedef.IndexOf(';')].Trim();
+                    var pointerType = typedef[(star + 1)..typedef.IndexOf(';')].Trim();
 
                     UUIDs.Add(name, guid);
-                    Types.Add(pointerType.ToString(), name);
+                    Types.Add(pointerType.ToString(), (name, isValueType: false));
                 }
                 else if (line.StartsWith("typedef struct _") || line.StartsWith("typedef union _"))
                 {
@@ -255,8 +255,8 @@ namespace SrcGen
             }
 
             var generatedStructName = SnakeToCamel(structName);
-            Types[$"{structName}"] = generatedStructName;
-            Types[$"P{structName}"] = generatedStructName;
+            Types[$"{structName}"] = (generatedStructName, isValueType: true);
+            Types[$"P{structName}"] = (generatedStructName, isValueType: true);
 
             Output.WriteLine($"public struct {generatedStructName}");
             Output.WriteLine("{");
@@ -305,9 +305,9 @@ namespace SrcGen
                         type = line[(type.Length + 1)..space];
                     }
 
-                    if (TryGetGeneratedType(type, out var generatedType))
+                    if (TryGetGeneratedType(type, out var managed))
                     {
-                        type = generatedType;
+                        type = managed.generatedName;
                     }
                     else if (type.EndsWith("PCWSTR"))
                     {
@@ -630,7 +630,7 @@ namespace SrcGen
                         Debug.Assert(!type.IsEmpty);
 
                         var pointerIndirections = 0;
-                        if (type[0] == 'P')
+                        if (type[0] == 'P' || type.StartsWith("LP"))
                         {
                             pointerIndirections++;
                         }
@@ -639,27 +639,41 @@ namespace SrcGen
                             pointerIndirections++;
                         }
 
-                        string managedType;
+                        string generatedName;
+                        var isValueType = true;
 
-                        if (!TryGetGeneratedType(type, out managedType))
+                        if (TryGetGeneratedType(type, out var managed))
                         {
-                            managedType = (type[0] == 'P' ? type[1..] : type).ToString();
+                            generatedName = managed.generatedName;
+                            isValueType = managed.isValueType;
+                        }
+                        else
+                        {
+                            generatedName = (type[0] == 'P' ? type[1..] : type.StartsWith("LP") ? type[2..] : type).ToString();
+
+                            if (type.EndsWith("STR"))
+                            {
+                                isValueType = false;
+                            }
                         }
 
                         if (pointerIndirections == 1)
                         {
                             if (spanSizeExpr.IsEmpty)
                             {
-                                managedType = isReadOnly ? $"in {managedType}" : $"out {managedType}";
+                                if (isValueType)
+                                {
+                                    generatedName = isReadOnly ? $"in {generatedName}" : $"out {generatedName}";
+                                }
                             }
                             else
                             {
-                                if (managedType == "VOID")
+                                if (generatedName == "VOID")
                                 {
-                                    managedType = "byte";
+                                    generatedName = "byte";
                                 }
 
-                                managedType = isReadOnly ? $"ReadOnlySpan<{managedType}>" : $"Span<{managedType}>";
+                                generatedName = isReadOnly ? $"ReadOnlySpan<{generatedName}>" : $"Span<{generatedName}>";
                             }
                         }
 
@@ -670,44 +684,7 @@ namespace SrcGen
                         }
 
                         WriteIndent(2);
-                        Output.WriteLine($"{managedType} {nameAndRest}");
-
-                        //var parts = line.Split(' ');
-                        //if (parts[1] == "_Reserved_")
-                        //{
-                        //    parts[1] = parts[2];
-                        //    parts[2] = parts[3];
-                        //}
-
-                        //var cppAttr = parts[0];
-                        //var type = parts[1];
-                        //var param = parts[2];
-
-                        //bool isArray;
-                        //output.Append("        ")
-                        //      .Append(ToIdlAttr(cppAttr, ref paramWasOptional, type, out isArray)).Append(' ');
-
-                        //if (isArray)
-                        //{
-                        //    if (type == "PVOID")
-                        //    {
-                        //        type = "byte";
-                        //    }
-                        //    if (type.StartsWith("P"))
-                        //    {
-                        //        type = type.Substring(1);
-                        //    }
-                        //    if (param.EndsWith(","))
-                        //    {
-                        //        param = param.Replace(",", "[],");
-                        //    }
-                        //    else
-                        //    {
-                        //        param += "[]";
-                        //    }
-                        //}
-
-                        //output.Append(type).Append(' ').AppendLine(param);
+                        Output.WriteLine($"{generatedName} {nameAndRest}");
                     }
                     else if (line.StartsWith('.'))
                     {
@@ -725,65 +702,6 @@ namespace SrcGen
 
             Output.WriteLine("}");
             Output.WriteLine();
-        }
-
-        private static string ToIdlAttr(string cppAttr, ref bool wasOptional, string type, out bool isArray)
-        {
-            // http://msdn.microsoft.com/en-us/library/hh916382.aspx
-
-            var result = new StringBuilder("[");
-
-            if (cppAttr.StartsWith("_In_"))
-            {
-                result.Append("in");
-            }
-            else if (cppAttr.StartsWith("_Out_"))
-            {
-                result.Append("out");
-            }
-            else
-            {
-                result.Append("in,out");
-            }
-
-            if (cppAttr.Contains("_opt_") || wasOptional)
-            {
-                result.Append(",optional");
-                wasOptional = true;
-            }
-
-            // http://msdn.microsoft.com/en-us/library/windows/desktop/aa366731(v=vs.85).aspx
-
-            isArray = false;
-            if (type.EndsWith("STR"))
-            {
-                result.Append(",string");
-            }
-            else
-            {
-                var lp = cppAttr.IndexOf('(');
-                if (lp > 0)
-                {
-                    var param = cppAttr.Substring(lp + 1, cppAttr.Length - lp - 2);
-                    if (cppAttr.Contains("_to_"))
-                    {
-                        param = param.Split(',')[0];
-                    }
-                    if (!cppAttr.Contains("_bytes_"))
-                    {
-                        if (type.StartsWith("P"))
-                        {
-                            type = type.Substring(1);
-                        }
-                        param = $"{param} * sizeof({type})";
-                    }
-
-                    isArray = true;
-                    result.Append($",size_is({param})");
-                }
-            }
-
-            return result.Append(']').ToString();
         }
 
         private static string SnakeToCamel(ReadOnlySpan<char> snake)

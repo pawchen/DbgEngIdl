@@ -245,4 +245,176 @@ public class InterfaceTests : TestsBase
             "");
     }
 
+    [Fact]
+    public void TestPointerParam1()
+    {
+        AssertGenerated("""
+            [GeneratedComInterface(Options = ComInterfaceOptions.ComObjectWrapper)]
+            [Guid("f2df5f53-071f-47bd-9de6-5734c3fed689")]
+            public partial interface ISomeInterface
+            {
+                [PreserveSig]
+                HRESULT Boom
+                (
+                    // _In_opt_
+                    ISomeInterface Name
+                );
+
+            }
+
+            public static partial class Constants
+            {
+                public static ReadOnlySpan<byte> IID_ISomeInterface => [0x53, 0x5f, 0xdf, 0xf2, 0x1f, 0x07, 0xbd, 0x47, 0x9d, 0xe6, 0x57, 0x34, 0xc3, 0xfe, 0xd6, 0x89];
+            }
+            """,
+                hppSrc: """
+            typedef interface DECLSPEC_UUID("f2df5f53-071f-47bd-9de6-5734c3fed689")
+                ISomeInterface* PSOME_INTERFACE;
+
+            #undef INTERFACE
+            #define INTERFACE ISomeInterface
+            DECLARE_INTERFACE_(ISomeInterface, IUnknown)
+            {
+                // ISomeInterface.
+                STDMETHOD(Boom)(
+                    THIS_
+                    _In_opt_ PSOME_INTERFACE Name
+                    ) PURE;
+            };
+            """,
+            "");
+    }
+
+    [Fact]
+    public void TestPointerParam2()
+    {
+        AssertGenerated("""
+            [GeneratedComInterface(Options = ComInterfaceOptions.ComObjectWrapper)]
+            [Guid("f2df5f53-071f-47bd-9de6-5734c3fed689")]
+            public partial interface ISomeInterface
+            {
+                [PreserveSig]
+                HRESULT Boom
+                (
+                    // _In_opt_
+                    in ULONG Name
+                );
+
+            }
+
+            public static partial class Constants
+            {
+                public static ReadOnlySpan<byte> IID_ISomeInterface => [0x53, 0x5f, 0xdf, 0xf2, 0x1f, 0x07, 0xbd, 0x47, 0x9d, 0xe6, 0x57, 0x34, 0xc3, 0xfe, 0xd6, 0x89];
+            }
+            """,
+                hppSrc: """
+            typedef interface DECLSPEC_UUID("f2df5f53-071f-47bd-9de6-5734c3fed689")
+                ISomeInterface* PSOME_INTERFACE;
+
+            #undef INTERFACE
+            #define INTERFACE ISomeInterface
+            DECLARE_INTERFACE_(ISomeInterface, IUnknown)
+            {
+                // ISomeInterface.
+                STDMETHOD(Boom)(
+                    THIS_
+                    _In_opt_ PULONG Name
+                    ) PURE;
+            };
+            """,
+            "");
+    }
+
+    [Fact]
+    public void TestPointerParam3()
+    {
+        AssertGenerated("""
+            [GeneratedComInterface(Options = ComInterfaceOptions.ComObjectWrapper)]
+            [Guid("f2df5f53-071f-47bd-9de6-5734c3fed689")]
+            public partial interface ISomeInterface
+            {
+                [PreserveSig]
+                HRESULT Boom
+                (
+                    // _In_opt_
+                    in GUID Name
+                );
+
+            }
+
+            public static partial class Constants
+            {
+                public static ReadOnlySpan<byte> IID_ISomeInterface => [0x53, 0x5f, 0xdf, 0xf2, 0x1f, 0x07, 0xbd, 0x47, 0x9d, 0xe6, 0x57, 0x34, 0xc3, 0xfe, 0xd6, 0x89];
+            }
+            """,
+                hppSrc: """
+            typedef interface DECLSPEC_UUID("f2df5f53-071f-47bd-9de6-5734c3fed689")
+                ISomeInterface* PSOME_INTERFACE;
+
+            #undef INTERFACE
+            #define INTERFACE ISomeInterface
+            DECLARE_INTERFACE_(ISomeInterface, IUnknown)
+            {
+                // ISomeInterface.
+                STDMETHOD(Boom)(
+                    THIS_
+                    _In_opt_ LPGUID Name
+                    ) PURE;
+            };
+            """,
+            "");
+    }
+
+    [Fact]
+    public void TestPointerParam4()
+    {
+        AssertGenerated("""
+            public struct DebugOffsetRegion
+            {
+                public ULONG64 Base;
+                public ULONG64 Size;
+            }
+
+            [GeneratedComInterface(Options = ComInterfaceOptions.ComObjectWrapper)]
+            [Guid("f2df5f53-071f-47bd-9de6-5734c3fed689")]
+            public partial interface ISomeInterface
+            {
+                [PreserveSig]
+                HRESULT Boom
+                (
+                    // _In_opt_
+                    in DebugOffsetRegion Name
+                );
+
+            }
+
+            public static partial class Constants
+            {
+                public static ReadOnlySpan<byte> IID_ISomeInterface => [0x53, 0x5f, 0xdf, 0xf2, 0x1f, 0x07, 0xbd, 0x47, 0x9d, 0xe6, 0x57, 0x34, 0xc3, 0xfe, 0xd6, 0x89];
+            }
+            """,
+                hppSrc: """
+            typedef interface DECLSPEC_UUID("f2df5f53-071f-47bd-9de6-5734c3fed689")
+                ISomeInterface* PSOME_INTERFACE;
+
+            typedef struct _DEBUG_OFFSET_REGION
+            {
+                ULONG64 Base;
+                ULONG64 Size;
+            } DEBUG_OFFSET_REGION, *PDEBUG_OFFSET_REGION;
+
+            #undef INTERFACE
+            #define INTERFACE ISomeInterface
+            DECLARE_INTERFACE_(ISomeInterface, IUnknown)
+            {
+                // ISomeInterface.
+                STDMETHOD(Boom)(
+                    THIS_
+                    _In_opt_ PDEBUG_OFFSET_REGION Name
+                    ) PURE;
+            };
+            """,
+            "");
+    }
+
 }
