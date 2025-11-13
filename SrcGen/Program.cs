@@ -625,16 +625,16 @@ namespace SrcGen
                             line = line[afterComment..].TrimStart();
                         }
 
-                        var type = line[..line.IndexOfAny(" *")];
+                        var nativeType = line[..line.IndexOfAny(" *")];
 
-                        Debug.Assert(!type.IsEmpty);
+                        Debug.Assert(!nativeType.IsEmpty);
 
                         var pointerIndirections = 0;
-                        if (type[0] == 'P' || type.StartsWith("LP"))
+                        if (nativeType[0] == 'P' || nativeType.StartsWith("LP"))
                         {
                             pointerIndirections++;
                         }
-                        if (line[type.Length..].Contains('*'))
+                        if (line[nativeType.Length..].Contains('*'))
                         {
                             pointerIndirections++;
                         }
@@ -642,16 +642,16 @@ namespace SrcGen
                         string generatedName;
                         var isValueType = true;
 
-                        if (TryGetGeneratedType(type, out var managed))
+                        if (TryGetGeneratedType(nativeType, out var managed))
                         {
                             generatedName = managed.generatedName;
                             isValueType = managed.isValueType;
                         }
                         else
                         {
-                            generatedName = (type[0] == 'P' ? type[1..] : type.StartsWith("LP") ? type[2..] : type).ToString();
+                            generatedName = (nativeType[0] == 'P' ? nativeType[1..] : nativeType.StartsWith("LP") ? nativeType[2..] : nativeType).ToString();
 
-                            if (type.EndsWith("STR"))
+                            if (nativeType.EndsWith("STR"))
                             {
                                 isValueType = false;
                             }
@@ -665,6 +665,20 @@ namespace SrcGen
                                 {
                                     generatedName = isReadOnly ? $"in {generatedName}" : $"out {generatedName}";
                                 }
+                                else if (nativeType.EndsWith("STR"))
+                                {
+                                    switch (nativeType)
+                                    {
+                                        case "PSTR" when isReadOnly:
+                                        case "PCSTR":
+                                            WriteIndent(2);
+                                            Output.WriteLine("[MarshalAs(UnmanagedType.LPStr)]");
+                                            generatedName = "string";
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                }
                             }
                             else
                             {
@@ -677,7 +691,7 @@ namespace SrcGen
                             }
                         }
 
-                        var nameAndRest = line[type.Length..].TrimStart();
+                        var nameAndRest = line[nativeType.Length..].TrimStart();
                         if (nameAndRest[0] == '*')
                         {
                             nameAndRest = nameAndRest[1..];
