@@ -723,7 +723,11 @@ namespace SrcGen
                     }
                     else if (line.StartsWith('.'))
                     {
-                        //output.AppendLine("        [optional] SAFEARRAY(VARIANT)");
+                        Output.WriteLine("""
+                                    // ...
+                                    [In, MarshalUsing(typeof(ComVariantMarshaller), ElementIndirectionDepth = 1)]
+                                    params object[] Args
+                            """);
                     }
                     else if (line.StartsWith(") PURE;"))
                     {

@@ -458,6 +458,47 @@ public class InterfaceTests : TestsBase
     }
 
     [Fact]
+    public void TestDotDotDotParam1()
+    {
+        AssertGenerated("""
+            [GeneratedComInterface(Options = ComInterfaceOptions.ComObjectWrapper)]
+            [Guid("f2df5f53-071f-47bd-9de6-5734c3fed689")]
+            public partial interface ISomeInterface
+            {
+                [PreserveSig]
+                HRESULT Boom
+                (
+                    // ...
+                    [In, MarshalUsing(typeof(ComVariantMarshaller), ElementIndirectionDepth = 1)]
+                    params object[] Args
+                );
+
+            }
+
+            public static partial class Constants
+            {
+                public static ReadOnlySpan<byte> IID_ISomeInterface => [0x53, 0x5f, 0xdf, 0xf2, 0x1f, 0x07, 0xbd, 0x47, 0x9d, 0xe6, 0x57, 0x34, 0xc3, 0xfe, 0xd6, 0x89];
+            }
+            """,
+                hppSrc: """
+            typedef interface DECLSPEC_UUID("f2df5f53-071f-47bd-9de6-5734c3fed689")
+                ISomeInterface* PSOME_INTERFACE;
+
+            #undef INTERFACE
+            #define INTERFACE ISomeInterface
+            DECLARE_INTERFACE_(ISomeInterface, IUnknown)
+            {
+                // ISomeInterface.
+                STDMETHOD(Boom)(
+                    THIS_
+                    ...
+                    ) PURE;
+            };
+            """,
+            "");
+    }
+
+    [Fact]
     public void TestAnsiStringParam1()
     {
         AssertGenerated("""
