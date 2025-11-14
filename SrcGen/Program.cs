@@ -750,8 +750,5 @@ namespace SrcGen
 
             return result.ToString();
         }
-
-        [GeneratedRegex(@" *?/\*.*?\*/ *")]
-        private static partial Regex InlineCommentRegex { get; }
     }
 }
