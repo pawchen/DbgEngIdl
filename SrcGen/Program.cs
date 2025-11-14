@@ -674,7 +674,7 @@ namespace SrcGen
                                 }
                                 else if (nativeType.EndsWith("STR"))
                                 {
-                                    Debug.Assert(isIn);
+                                    Debug.Assert(isIn && !isOut);
 
                                     generatedName = "string";
 
