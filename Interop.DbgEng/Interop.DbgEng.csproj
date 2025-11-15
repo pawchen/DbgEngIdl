@@ -17,7 +17,17 @@
   </ItemGroup>
 
   <Target Name="GenSrc" AfterTargets="ResolveReferences">
-    <Exec Command="&quot;$(OutDir)../../SrcGen/$(Configuration)/SrcGen.exe&quot; &quot;$(MicrosoftDebuggingPlatformDbgEngContent)../build/native/inc/dbgeng.h&quot;" />
+    <PropertyGroup>
+      <SrcGenExe>&quot;$(OutDir)../../SrcGen/$(Configuration)/SrcGen.exe&quot;</SrcGenExe>
+      <DbgEngHFile>&quot;$(MicrosoftDebuggingPlatformDbgEngContent)../build/native/inc/dbgeng.h&quot;</DbgEngHFile>
+      <DbgEngMissingHFile>missing.h</DbgEngMissingHFile>
+      <SrcGenOutCsFile>$(IntermediateOutputPath)DbgEng.g.cs</SrcGenOutCsFile>
+    </PropertyGroup>
+    <Exec Command="$(SrcGenExe) $(DbgEngHFile) $(DbgEngMissingHFile) &quot;$(SrcGenOutCsFile)&quot;" />
+    <ItemGroup>
+      <Compile Include="$(SrcGenOutCsFile)" />
+      <FileWrites Include="$(SrcGenOutCsFile)" />
+    </ItemGroup>
   </Target>
 
 </Project>
