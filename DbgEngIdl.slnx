@@ -7,4 +7,5 @@
   </Project>
   <Project Path="SrcGen/SrcGen.csproj" Id="dbb3b947-1ec6-46c2-b0ca-5d31b70b1003" />
   <Project Path="SrcGenTests/SrcGenTests.csproj" Id="17e27386-f8e0-49dc-b4dd-3c618e5c2c8c" />
+  <Project Path="StackDump/StackDump.csproj" Id="dd1a2b5f-ac13-477f-8497-ae97d22f9cae" />
 </Solution>
