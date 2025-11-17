@@ -18,12 +18,35 @@ sealed class DumpAnalyzer : IDisposable
     {
         var root = IDebugClient.Create();
 
-        root.OpenDumpFile(dumpFile);
-        ((IDebugControl)root).WaitForEvent(0, 0);
+        var hr = root.OpenDumpFile(dumpFile);
+
+        if (hr != 0)
+        {
+            throw new COMException(nameof(root.OpenDumpFile), hr);
+        }
+
+        hr = ((IDebugControl)root).WaitForEvent(0, 0);
+
+        if (hr != 0)
+        {
+            throw new COMException(nameof(IDebugControl.WaitForEvent), hr);
+        }
 
         var symbols = (IDebugSymbols)root;
-        symbols.SetImagePath(imagePaths);
-        symbols.SetSymbolPath(symbolPaths);
+
+        hr = symbols.SetImagePath(imagePaths);
+
+        if (hr != 0)
+        {
+            throw new COMException(nameof(symbols.SetImagePath), hr);
+        }
+
+        hr = symbols.SetSymbolPath(symbolPaths);
+
+        if (hr != 0)
+        {
+            throw new COMException(nameof(symbols.SetSymbolPath), hr);
+        }
 
         return new DumpAnalyzer(root);
     }
