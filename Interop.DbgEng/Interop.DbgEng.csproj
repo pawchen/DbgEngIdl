@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net9.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -12,18 +12,35 @@
     <PackageReference Include="Microsoft.Debugging.Platform.SymSrv" Version="20250929.1313.0" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <PackageId>DumbPrograms.DbgEng</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>diryboy</Authors>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>.NET interop library to DbgEng</Title>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Pack="True" Visible="False" Include="$(MicrosoftDebuggingPlatformDbgEngContent)amd64/*" PackagePath="runtimes/win-x64/native/" />
+    <None Pack="True" Visible="False" Include="$(MicrosoftDebuggingPlatformSymSrvContent)amd64/*" PackagePath="runtimes/win-x64/native/" />
+    <None Pack="True" Visible="False" Include="$(MicrosoftDebuggingPlatformDbgEngContent)x86/*" PackagePath="runtimes/win-x86/native/" />
+    <None Pack="True" Visible="False" Include="$(MicrosoftDebuggingPlatformSymSrvContent)x86/*" PackagePath="runtimes/win-x86/native/" />
+    <None Pack="True" Visible="False" Include="$(MicrosoftDebuggingPlatformDbgEngContent)arm64/*" PackagePath="runtimes/win-arm64/native/" />
+    <None Pack="True" Visible="False" Include="$(MicrosoftDebuggingPlatformSymSrvContent)arm64/*" PackagePath="runtimes/win-arm64/native/" />
+  </ItemGroup>
+
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.DisableRuntimeMarshalling" />
   </ItemGroup>
 
   <Target Name="GenSrc" AfterTargets="ResolveReferences">
     <PropertyGroup>
-      <SrcGenExe>&quot;$(OutDir)../../SrcGen/$(Configuration)/SrcGen.exe&quot;</SrcGenExe>
-      <DbgEngHFile>&quot;$(MicrosoftDebuggingPlatformDbgEngContent)../build/native/inc/dbgeng.h&quot;</DbgEngHFile>
+      <SrcGenExe>$(OutDir)../../SrcGen/$(Configuration)/SrcGen.exe</SrcGenExe>
+      <DbgEngHFile>$(MicrosoftDebuggingPlatformDbgEngContent)../build/native/inc/dbgeng.h</DbgEngHFile>
       <DbgEngMissingHFile>missing.h</DbgEngMissingHFile>
       <SrcGenOutCsFile>$(IntermediateOutputPath)DbgEng.g.cs</SrcGenOutCsFile>
     </PropertyGroup>
-    <Exec Command="$(SrcGenExe) $(DbgEngHFile) $(DbgEngMissingHFile) &quot;$(SrcGenOutCsFile)&quot;" />
+    <Exec Command="&quot;$(SrcGenExe)&quot; &quot;$(DbgEngHFile)&quot; &quot;$(DbgEngMissingHFile)&quot; &quot;$(SrcGenOutCsFile)&quot;" />
     <ItemGroup>
       <Compile Include="$(SrcGenOutCsFile)" />
       <FileWrites Include="$(SrcGenOutCsFile)" />
