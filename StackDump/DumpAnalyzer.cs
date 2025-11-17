@@ -112,9 +112,9 @@ sealed class DumpAnalyzer : IDisposable
             }
             else
             {
-                imageName = Encoding.ASCII.GetString(imageNameSpan[..(int)imageNameSize]);
-                moduleName = Encoding.ASCII.GetString(moduleNameSpan[..(int)moduleNameSize]);
-                loadedImageName = Encoding.ASCII.GetString(loadedImageNameSpan[..(int)loadedImageNameSize]);
+                imageName = Encoding.ASCII.GetString(imageNameSpan[..(int)--imageNameSize]);
+                moduleName = Encoding.ASCII.GetString(moduleNameSpan[..(int)--moduleNameSize]);
+                loadedImageName = Encoding.ASCII.GetString(loadedImageNameSpan[..(int)--loadedImageNameSize]);
             }
 
             frame.ModuleName = loadedImageName;
@@ -131,7 +131,7 @@ sealed class DumpAnalyzer : IDisposable
                 continue;
             }
 
-            var symbolName = Encoding.ASCII.GetString(symbolNameSpan[..(int)nameSize]);
+            var symbolName = Encoding.ASCII.GetString(symbolNameSpan[..(int)--nameSize]);
             frame.SymbolName = symbolName.Contains('!') ? symbolName[(symbolName.IndexOf('!') + 1)..] : "<unknown>";
             stackTrace.Add(frame);
         }
