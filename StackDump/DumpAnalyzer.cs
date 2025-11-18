@@ -59,7 +59,6 @@ sealed class DumpAnalyzer : IDisposable
         var symbols = (IDebugSymbols)Client;
         var control = (IDebugControl4)Client;
 
-        byte[] context, extraInfo;
         var hr = control.GetStoredEventInformation(out _, out _, out _
                                                   , null, 0, out var contextSize
                                                   , null, 0, out var extraInfoSize
@@ -70,8 +69,8 @@ sealed class DumpAnalyzer : IDisposable
             throw new COMException(nameof(control.GetStoredEventInformation), hr);
         }
 
-        context = new byte[contextSize];
-        extraInfo = new byte[extraInfoSize];
+        var context = new byte[contextSize];
+        var extraInfo = new byte[extraInfoSize];
         hr = control.GetStoredEventInformation(out _, out _, out _
                                               , context, contextSize, out _
                                               , extraInfo, extraInfoSize, out _
