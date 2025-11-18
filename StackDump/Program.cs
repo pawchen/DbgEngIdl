@@ -5,11 +5,19 @@ namespace StackDump;
 
 internal class Program
 {
-    private static int Main( string[] args )
+    private static int Main(string[] args)
     {
-        if ( args.Length != 3 )
+        if (args.Length != 3)
         {
             return -2;
+        }
+
+        if (!File.Exists("dbgeng.dll") && Directory.Exists(Path.Combine("native", RuntimeInformation.RuntimeIdentifier)))
+        {
+            foreach (var item in Directory.EnumerateFiles(Path.Combine("native", RuntimeInformation.RuntimeIdentifier)))
+            {
+                File.Copy(item, Path.GetFileName(item));
+            }
         }
 
         try
@@ -23,7 +31,7 @@ internal class Program
 
             return 0;
         }
-        catch ( Exception e )
+        catch (Exception e)
         {
             Console.Error.Write(e);
 

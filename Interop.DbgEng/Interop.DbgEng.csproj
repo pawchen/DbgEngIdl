@@ -21,12 +21,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Pack="True" Visible="False" Include="$(MicrosoftDebuggingPlatformDbgEngContent)amd64/*" PackagePath="runtimes/win-x64/native/" />
-    <None Pack="True" Visible="False" Include="$(MicrosoftDebuggingPlatformSymSrvContent)amd64/*" PackagePath="runtimes/win-x64/native/" />
-    <None Pack="True" Visible="False" Include="$(MicrosoftDebuggingPlatformDbgEngContent)x86/*" PackagePath="runtimes/win-x86/native/" />
-    <None Pack="True" Visible="False" Include="$(MicrosoftDebuggingPlatformSymSrvContent)x86/*" PackagePath="runtimes/win-x86/native/" />
-    <None Pack="True" Visible="False" Include="$(MicrosoftDebuggingPlatformDbgEngContent)arm64/*" PackagePath="runtimes/win-arm64/native/" />
-    <None Pack="True" Visible="False" Include="$(MicrosoftDebuggingPlatformSymSrvContent)arm64/*" PackagePath="runtimes/win-arm64/native/" />
+    <None Pack="True" Include="$(MicrosoftDebuggingPlatformDbgEngContent)amd64/*" PackagePath="runtimes/win-x64/native/"
+          CopyToOutputDirectory="PreserveNewest" Link="native/win-x64/%(FileName)%(Extension)" />
+    <None Pack="True" Include="$(MicrosoftDebuggingPlatformSymSrvContent)amd64/*" PackagePath="runtimes/win-x64/native/"
+          CopyToOutputDirectory="PreserveNewest" Link="native/win-x64/%(FileName)%(Extension)" />
+    <None Pack="True" Include="$(MicrosoftDebuggingPlatformDbgEngContent)x86/*" PackagePath="runtimes/win-x86/native/"
+          CopyToOutputDirectory="PreserveNewest" Link="native/win-x86/%(FileName)%(Extension)" />
+    <None Pack="True" Include="$(MicrosoftDebuggingPlatformSymSrvContent)x86/*" PackagePath="runtimes/win-x86/native/"
+          CopyToOutputDirectory="PreserveNewest" Link="native/win-x86/%(FileName)%(Extension)" />
+    <None Pack="True" Include="$(MicrosoftDebuggingPlatformDbgEngContent)arm64/*" PackagePath="runtimes/win-arm64/native/"
+          CopyToOutputDirectory="PreserveNewest" Link="native/win-arm64/%(FileName)%(Extension)" />
+    <None Pack="True" Include="$(MicrosoftDebuggingPlatformSymSrvContent)arm64/*" PackagePath="runtimes/win-arm64/native/"
+          CopyToOutputDirectory="PreserveNewest" Link="native/win-arm64/%(FileName)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>
