@@ -41,12 +41,12 @@
 
   <Target Name="GenSrc" DependsOnTargets="ResolveReferences" BeforeTargets="BeforeCompile">
     <PropertyGroup>
-      <SrcGenExe>$(OutDir)../../SrcGen/$(Configuration)/SrcGen.exe</SrcGenExe>
+      <SrcGenDll>$(OutDir)../../SrcGen/$(Configuration)/SrcGen.dll</SrcGenDll>
       <DbgEngHFile>$(MicrosoftDebuggingPlatformDbgEngContent)../build/native/inc/dbgeng.h</DbgEngHFile>
       <DbgEngMissingHFile>missing.h</DbgEngMissingHFile>
       <SrcGenOutCsFile>$(IntermediateOutputPath)DbgEng.g.cs</SrcGenOutCsFile>
     </PropertyGroup>
-    <Exec Command="&quot;$(SrcGenExe)&quot; &quot;$(DbgEngHFile)&quot; &quot;$(DbgEngMissingHFile)&quot; &quot;$(SrcGenOutCsFile)&quot;" />
+    <Exec Command="dotnet &quot;$(SrcGenDll)&quot; &quot;$(DbgEngHFile)&quot; &quot;$(DbgEngMissingHFile)&quot; &quot;$(SrcGenOutCsFile)&quot;" />
     <ItemGroup>
       <Compile Include="$(SrcGenOutCsFile)" />
       <FileWrites Include="$(SrcGenOutCsFile)" />
