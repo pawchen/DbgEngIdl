@@ -13,11 +13,14 @@
   </ItemGroup>
 
   <PropertyGroup>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>DumbPrograms.DbgEng</PackageId>
     <Version>0.1.2025.0929</Version>
     <Authors>diryboy</Authors>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Title>.NET interop library to DbgEng</Title>
+    <Title>.Net library to use dbgeng.h</Title>
+    <Description>.Net interop library to use dbgeng.h</Description>
+    <RepositoryUrl>https://github.com/DumbPrograms/DbgEng</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
