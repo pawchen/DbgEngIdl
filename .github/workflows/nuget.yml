@@ -2,7 +2,7 @@ on:
   workflow_dispatch:
 jobs:
   publish:
-    runs-on: ubuntu-slim
+    runs-on: windows-latest
   
     permissions:
       id-token: write  # enable GitHub OIDC token issuance for this job
