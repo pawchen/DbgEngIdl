@@ -41,7 +41,7 @@
 
   <Target Name="GenSrc" DependsOnTargets="ResolveReferences" BeforeTargets="BeforeCompile">
     <PropertyGroup>
-      <SrcGenDll>$(OutDir)../../SrcGen/$(Configuration)/SrcGen.dll</SrcGenDll>
+      <SrcGenDll>$(ArtifactsPath)/bin/SrcGen/$(Configuration)/SrcGen.dll</SrcGenDll>
       <DbgEngHFile>$(MicrosoftDebuggingPlatformDbgEngContent)../build/native/inc/dbgeng.h</DbgEngHFile>
       <DbgEngMissingHFile>missing.h</DbgEngMissingHFile>
       <SrcGenOutCsFile>$(IntermediateOutputPath)DbgEng.g.cs</SrcGenOutCsFile>
