@@ -15,7 +15,8 @@
   <PropertyGroup>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>DumbPrograms.DbgEng</PackageId>
-    <Version>0.2.2025.0929</Version>
+    <Version>0.3.2025.0929</Version>
+    <PackageVersion>$(Version)-beta</PackageVersion>
     <Authors>diryboy</Authors>
     <Title>.Net library to use dbgeng.h</Title>
     <Description>.Net interop library to use dbgeng.h</Description>
