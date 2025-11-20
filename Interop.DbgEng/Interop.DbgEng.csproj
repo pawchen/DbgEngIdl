@@ -15,16 +15,18 @@
   <PropertyGroup>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>DumbPrograms.DbgEng</PackageId>
-    <Version>0.4.2025.0929</Version>
+    <Version>0.5.2025.0929</Version>
     <PackageVersion>$(Version)-beta</PackageVersion>
     <Authors>diryboy</Authors>
     <Title>.Net library to use dbgeng.h</Title>
     <Description>.Net interop library to use dbgeng.h</Description>
     <RepositoryUrl>https://github.com/DumbPrograms/DbgEng</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Pack="True" Include="../README.md" PackagePath="/"/>
     <None Pack="True" Include="$(MicrosoftDebuggingPlatformDbgEngContent)amd64/*" PackagePath="runtimes/win-x64/native/"
           CopyToOutputDirectory="PreserveNewest" Link="native/win-x64/%(FileName)%(Extension)" />
     <None Pack="True" Include="$(MicrosoftDebuggingPlatformSymSrvContent)amd64/*" PackagePath="runtimes/win-x64/native/"
