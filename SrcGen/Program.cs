@@ -110,6 +110,10 @@ namespace SrcGen
                 LastRemarks = RemarksBuilder.ToString();
                 RemarksBuilder.Clear();
             }
+            else
+            {
+                LastRemarks = null;
+            }
 
             return false;
         }
