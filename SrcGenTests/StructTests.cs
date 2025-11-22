@@ -362,6 +362,75 @@ public class StructTests : TestsBase
     }
 
     [Fact]
+    public void TestConstant6()
+    {
+        AssertGenerated("""
+            public static partial class Constants
+            {
+                /// <remarks>
+                /// remarks
+                /// </remarks>
+                public const UINT64 X = 0x100000000; // comment
+            }
+            """,
+            hppSrc: """
+            // remarks
+            #define X 0x100000000 // comment
+            """,
+            "");
+    }
+
+    [Fact]
+    public void TestConstant7()
+    {
+        AssertGenerated("""
+            public static partial class Constants
+            {
+                /// <remarks>
+                /// ///////
+                /// <br />
+                /// -------
+                /// <br />
+                /// <br />
+                /// In
+                /// <br />
+                /// <br />
+                /// Out
+                /// <br />
+                /// </remarks>
+                public const UINT64 X = 0x100000000; // comment
+            }
+            """,
+            hppSrc: """
+            /////////
+            //-------
+            // In
+            // Out
+            #define X 0x100000000 // comment
+            """,
+            "");
+    }
+
+    [Fact]
+    public void TestConstant8()
+    {
+        AssertGenerated("""
+            public static partial class Constants
+            {
+                /// <remarks>
+                /// remarks &gt; 0
+                /// </remarks>
+                public const UINT64 X = 0x100000000; // comment
+            }
+            """,
+            hppSrc: """
+            // remarks > 0
+            #define X 0x100000000 // comment
+            """,
+            "");
+    }
+
+    [Fact]
     public void TestInlineArray1()
     {
         AssertGenerated("""

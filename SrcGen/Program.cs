@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Security;
 using System.Text;
+using System.Xml;
 
 namespace SrcGen
 {
@@ -24,8 +26,9 @@ namespace SrcGen
         readonly TextWriter Output;
         readonly Dictionary<string, string> UUIDs = [];
         readonly Dictionary<string, (string managedType, bool isValueType)> Types = [];
-        readonly Dictionary<string, (string type, string value, string comment)> Constants = [];
+        readonly Dictionary<string, (string type, string value, string? comment, string? remarks)> Constants = [];
         readonly HashSet<int> InlineArrays = [];
+        readonly StringBuilder Remarks = new();
 
         bool TryGetManagedType(ReadOnlySpan<char> nativeType, out (string name, bool isValueType) managedType)
             => Types.GetAlternateLookup<ReadOnlySpan<char>>().TryGetValue(nativeType, out managedType);
@@ -83,15 +86,37 @@ namespace SrcGen
 
             while (hpp.Peek() > -1)
             {
-                var line = hpp.ReadLine();
+                var fullLine = hpp.ReadLine()!;
+                var line = fullLine.AsSpan();
 
-                if (line.StartsWith("#define ") || line.StartsWith("const "))
+                if (line.IsWhiteSpace())
                 {
-                    TryCollectConstant(line);
+                    Remarks.Clear();
                 }
-                else if (line.StartsWith(DECLSPEC_UUID))
+                else if (fullLine.StartsWith("//"))
                 {
-                    var guid = line.Substring(DECLSPEC_UUID.Length, "f2df5f53-071f-47bd-9de6-5734c3fed689".Length);
+                    var startsWithUpperCaseLetter = line.Length > 3 && line[2] == ' ' && Char.IsUpper(line[3]);
+
+                    if (startsWithUpperCaseLetter)
+                    {
+                        Remarks.AppendLine("/// <br />");
+                    }
+
+                    Remarks.Append("/// ");
+                    Remarks.AppendLine(SecurityElement.Escape($"{line[2..].TrimStart()}"));
+
+                    if (line.Length > 2 && line[2] is '/' or '-' || startsWithUpperCaseLetter)
+                    {
+                        Remarks.AppendLine("/// <br />");
+                    }
+                }
+                else if (fullLine.StartsWith("#define ") || fullLine.StartsWith("const "))
+                {
+                    TryCollectConstant(fullLine);
+                }
+                else if (fullLine.StartsWith(DECLSPEC_UUID))
+                {
+                    var guid = fullLine.Substring(DECLSPEC_UUID.Length, "f2df5f53-071f-47bd-9de6-5734c3fed689".Length);
                     var typedef = hpp.ReadLine().AsSpan().Trim();
                     var star = typedef.IndexOf('*');
                     var name = typedef[..star].ToString();
@@ -100,13 +125,13 @@ namespace SrcGen
                     UUIDs.Add(name, guid);
                     Types.Add(pointerType.ToString(), (name, isValueType: false));
                 }
-                else if (line.StartsWith("typedef struct _") || line.StartsWith("typedef union _"))
+                else if (fullLine.StartsWith("typedef struct _") || fullLine.StartsWith("typedef union _"))
                 {
-                    WriteStruct(hpp, line);
+                    WriteStruct(hpp, fullLine);
                 }
-                else if (line.StartsWith("DECLARE_INTERFACE_"))
+                else if (fullLine.StartsWith("DECLARE_INTERFACE_"))
                 {
-                    WriteInterface(hpp, line);
+                    WriteInterface(hpp, fullLine);
                 }
             }
         }
@@ -129,7 +154,7 @@ namespace SrcGen
                 var comment = GetComment(ref value);
                 var type = (value.StartsWith("0x") && value.Trim().Length > 10) ? "UINT64" : "UINT32";
 
-                Constants[name] = (type, value.ToString(), comment);
+                Constants[name] = (type, value.ToString(), comment, Remarks.Length > 0 ? Remarks.ToString() : null);
 
                 return true;
             }
@@ -151,14 +176,14 @@ namespace SrcGen
 
                 value = value[..value.IndexOf(';')];
 
-                Constants[name] = (type, value.ToString(), comment);
+                Constants[name] = (type, value.ToString(), comment, Remarks.Length > 0 ? Remarks.ToString() : null);
 
                 return true;
             }
 
-            static string GetComment(ref ReadOnlySpan<char> value)
+            static string? GetComment(ref ReadOnlySpan<char> value)
             {
-                string comment = null;
+                string? comment = null;
                 var slash = value.IndexOf("//");
                 if (slash > -1)
                 {
@@ -182,6 +207,22 @@ namespace SrcGen
 
             foreach (var (name, def) in Constants)
             {
+                if (def.remarks is string remarks)
+                {
+                    Output.WriteLine("    /// <remarks>");
+
+                    foreach (var line in remarks.AsSpan().EnumerateLines())
+                    {
+                        if (!line.IsEmpty)
+                        {
+                            WriteIndent(1);
+                            Output.WriteLine(line);
+                        }
+                    }
+
+                    Output.WriteLine("    /// </remarks>");
+                }
+
                 if (def.comment is null)
                 {
                     Output.WriteLine($"    public const {def.type} {name} = {def.value};");
@@ -234,13 +275,13 @@ namespace SrcGen
             Output.WriteLine();
         }
 
-        private string WriteStructBody(TextReader hpp, int level, bool isUnion)
+        private string? WriteStructBody(TextReader hpp, int level, bool isUnion)
         {
             var nestedStructs = 0;
 
             while (hpp.Peek() > -1)
             {
-                var fullLine = hpp.ReadLine();
+                var fullLine = hpp.ReadLine()!;
                 var line = fullLine.AsSpan().Trim();
 
                 if (line.IsEmpty)
@@ -362,7 +403,7 @@ namespace SrcGen
             WriteIndent(level);
             Output.WriteLine('{');
 
-            fullLine = WriteStructBody(hpp, level, isUnion);
+            fullLine = WriteStructBody(hpp, level, isUnion)!;
             line = fullLine.AsSpan().Trim();
 
             WriteIndent(level);
@@ -413,7 +454,7 @@ namespace SrcGen
             }
         }
 
-        private static string SeekToLine(TextReader hpp, string prefix, bool ignoreLeadingSpaces)
+        private static string? SeekToLine(TextReader hpp, string prefix, bool ignoreLeadingSpaces)
         {
             while (hpp.Peek() > -1)
             {
@@ -485,7 +526,7 @@ namespace SrcGen
 
             while (hpp.Peek() > -1)
             {
-                fullLine = hpp.ReadLine();
+                fullLine = hpp.ReadLine()!;
                 line = fullLine.AsSpan().Trim();
 
                 if (methodName.IsEmpty)

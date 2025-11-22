@@ -1,5 +1,6 @@
 ﻿///////////////////////////////////////////////////////////
 // missing structs
+
 const DWORD EXCEPTION_MAXIMUM_PARAMETERS = 15; // maximum number of exception parameters
 
 typedef struct _EXCEPTION_RECORD64 {
